@@ -182,11 +182,27 @@ namespace SurveyMonkey
         {
             _requestsMade++;
 
-            if (verb == Verb.GET)
+            /*
+             * The api requires TLS 1.2, so we set that here to allow requests to work
+             * Unfortunately this setting can only be enabled globally, so we change it back after we're done
+             * This will cause problems if another request is made at the same time on a different thread to a
+             * web service which _can't_ accept TLS 1.2. However we'll have to accept that risk
+            */
+            var securityProtocol = ServicePointManager.SecurityProtocol;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            try
             {
-                return _webClient.DownloadString(url);
+                if (verb == Verb.GET)
+                {
+                    return _webClient.DownloadString(url);
+                }
+
+                return _webClient.UploadString(url, verb.ToString(), JsonConvert.SerializeObject(data));
             }
-            return _webClient.UploadString(url, verb.ToString(), JsonConvert.SerializeObject(data));
+            finally
+            {
+                ServicePointManager.SecurityProtocol = securityProtocol;
+            }
         }
 
         private void RateLimit()
