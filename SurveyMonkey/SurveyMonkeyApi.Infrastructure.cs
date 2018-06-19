@@ -189,7 +189,7 @@ namespace SurveyMonkey
              * web service which _can't_ accept TLS 1.2. However we'll have to accept that risk
             */
             var securityProtocol = ServicePointManager.SecurityProtocol;
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; //TLS 1.2 value which works for .NET 4.0
             try
             {
                 if (verb == Verb.GET)
